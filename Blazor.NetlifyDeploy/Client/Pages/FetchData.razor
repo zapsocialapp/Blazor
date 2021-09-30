@@ -1,0 +1,45 @@
+﻿@page "/fetchdata"
+@inject HttpClient Http
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (forecast == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var timesery in forecast.TimeSeries)
+            {
+                var t = timesery.Parameters.FirstOrDefault(p => p.Name == "t");
+                if (t != null)
+                {
+                    <tr>
+                        <td>@timesery.ValidTime.ToShortDateString()</td>
+                        <td>@string.Join(", ", t.Values.Select(f => f.ToString()))</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private WeatherForecast forecast;
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecast = await Http.GetJsonAsync<WeatherForecast>("https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/16/lat/58/data.json");
+    }
+}
